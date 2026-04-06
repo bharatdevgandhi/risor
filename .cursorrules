@@ -1,0 +1,48 @@
+# RISOR — AI-Powered Second Brain
+
+## Project Context
+RISOR is a personal task and idea management system that captures unstructured brain dumps, classifies them using Claude AI, and organizes them using Eisenhower matrix prioritization, vector-based clustering, and goal-task hierarchies. Inspired by Karpathy's LLM Wiki pattern: raw data is compiled into persistent, compounding knowledge — not re-derived on every query.
+
+## Tech Stack
+- Next.js 15 App Router (Server Components + Server Actions)
+- TypeScript (strict mode)
+- Supabase (PostgreSQL + pgvector + Auth + Edge Functions)
+- Tailwind CSS + shadcn/ui components
+- Claude API (Anthropic) for classification and reviews
+- OpenAI API for embeddings (text-embedding-3-small, 1536d)
+
+## Architecture Principles
+- Server Components by default. Use 'use client' only when needed.
+- Server Actions for all mutations.
+- No client-side state management library.
+- Supabase RLS for all data access.
+- Classification self-improves via `classification_corrections` table.
+- `user_synthesis` is a living document updated by every weekly review.
+- `context_cache` is rebuilt nightly and injected into all LLM calls.
+- Nightly `lint` checks catch orphaned goals, stale items, recurring patterns.
+- Claude Haiku for classification, Sonnet for reviews/analysis.
+
+## Database: Key Tables
+- `items`: Core table. All brain dumps, tasks, ideas, goals. Has `embedding vector(1536)` + `search_vector tsvector`.
+- `activity_log`: Every action logged for pattern detection.
+- `classification_corrections`: Self-improving few-shot bank from user reclassifications.
+- `user_synthesis`: Living compiled understanding, updated each review.
+- `context_cache`: Pre-compiled context blobs for efficient LLM calls.
+- `lint_results`: Nightly health check findings.
+- `user_preferences`: Learned preferences that co-evolve with usage.
+
+## Item Categories (8)
+task, idea, project, research, learning, curiosity, art, reading
+
+## Code Conventions
+- `async function` not arrow for Server Actions
+- Zod for all API validation
+- kebab-case files, PascalCase components
+- shadcn from '@/components/ui/'
+- Never bypass RLS with service role key in client code
+- Self-compassion in all user-facing language — never shame
+
+## LLM Routing
+- Haiku 4.5 (~70%): Classification, triage, dedup, auto-tagging
+- Sonnet 4.6 (~20%): Weekly reviews, pattern analysis, affirmations
+- Opus 4.6 (~10%): Quarterly strategic analysis (future)
